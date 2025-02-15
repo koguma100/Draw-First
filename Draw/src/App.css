@@ -40,3 +40,16 @@
 .read-the-docs {
   color: #888;
 }
+
+.menu {
+  display: flex;
+  justify-content: center;
+  gap: 1em;
+  margin-top: 2em;
+}
+
+.menu-option {
+  display: flex;
+  flex-direction: column;
+
+}
