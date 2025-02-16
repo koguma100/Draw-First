@@ -1,5 +1,7 @@
 # Draw First!  A group drawing game by William Fralia and Fredy Fernandez
 
+## Check out the demo! --> https://youtu.be/yYnXnv-TRx4
+
 ## Inspiration
 Draw First is inspired by having fun with friends with art!
 Gartic phone is a similar game we took inspiration from as well.
