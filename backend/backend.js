@@ -24,7 +24,7 @@ const readRoomsFromFile = () => {
 
 // Function to save the room data to the file
 const saveRoomsToFile = (roomsData) => {
-  fs.writeFileSync(roomsFilePath, JSON.stringify(roomsData, null, 2), 'utf8');
+  fs.writeFileSync(roomsFilePath, JSON.stringify(roomsData, null, 3), 'utf8');
 };
 
 app.get('/', (req, res) => {
@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 
 // API Route to create a game
 app.post('/create-game', async (req, res) => {
-  const { code } = req.body;
+  const { code, user } = req.body;
 
   if (!code) {
     return res.status(400).send({ error: 'Code is required' });
@@ -54,7 +54,9 @@ app.post('/create-game', async (req, res) => {
     roomsData.validcodes.push(code);
 
     // Save host and room key
-    roomsData.roomSize.push({ code, players: [user] });
+    roomsData.roomSize.push({ code, host: user,players: [] });
+
+    saveRoomsToFile(roomsData);
 
     res.status(201).send({ message: 1 });
   } catch (err) {
@@ -85,6 +87,9 @@ app.post('/join-game', async (req, res) => {
       return res.status(400).send({ error: 'Room is full' });
     }
 
+    if (room.players.includes(user)) {
+        return res.status(400).send({ error: 'User already in the room' });
+    }
     // Player add to room
     room.players.push(user);
     
@@ -98,6 +103,52 @@ app.post('/join-game', async (req, res) => {
     res.status(500).send({ error: 'Failed to join the game' });
   }
 });
+
+// API Route to delete user from game
+app.post('/quit-game', async (req, res) => {
+    const { code, user } = req.body;
+  
+    if (!code || !user) {
+      return res.status(400).send({ error: 'Code and username are required' });
+    }
+  
+    try {
+        const roomsData = readRoomsFromFile();
+
+        // Check if the room exists
+        const room = roomsData.roomSize.find((room) => room.code === code);
+
+        if (!room) {
+            return res.status(400).send({ error: 'Room not found' });
+        }
+
+        if(room.host== user){
+            const roomIndex = roomsData.roomSize.indexOf(room);
+            roomsData.roomSize.splice(roomIndex, 1); // Delete the empty room
+            roomsData.validcodes.splice(roomsData.validcodes.indexOf(code),1);
+        }
+        else {
+            // Check if the user is in the room
+            const userIndex = room.players.indexOf(user);
+
+            if (userIndex === -1) {
+                return res.status(400).send({ error: 'User not in the room' });
+            }
+
+            // Remove the user from the room
+            room.players.splice(userIndex, 1);
+        }
+
+        // Save the updated data back to the JSON file
+        saveRoomsToFile(roomsData);
+
+        res.status(200).send({ message: 'User successfully removed from the game' });
+    } catch (err) {
+      console.error('Error quitting the game:', err);
+      res.status(500).send({ error: 'Failed to quit the game' });
+    }
+  });
+  
 
 // Start the server
 const PORT = 5000;

@@ -136,8 +136,34 @@ function Game({isHost, category, lobbyID, username}) {
         ctx.clearRect(0, 0, canvas.width, canvas.height); 
     }
 
+    const quitgame = async () => {
+        // Send POST request to backend to save the code
+        try {
+            const response = await fetch('http://localhost:5000/quit-game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Tell the server we are sending JSON
+                },
+                body: JSON.stringify({ code: lobbyID, user: username }), // Send the code as JSON in the body
+            });
+
+            const result = await response.json();
+
+            // Check the response from the backend
+            if (response.ok) {
+                console.log('Code saved successfully:', result.message);
+                navigate('/'); // Navigate to the category page
+            } else {
+                console.error('Error saving code:', result.error);
+                return;
+            }
+        } catch (error) {
+            console.error('Error sending data:', error);
+        }
+    };
+
     const exitLobby = () => {
-        navigate('/');
+        quitgame();
 
         // Send a message to the server to exit lobby
     }
