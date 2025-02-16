@@ -1,4 +1,4 @@
-# Draw First!  A group drawing game
+# Draw First!  A group drawing game by William Fralia and Fredy Fernandez
 
 ## Inspiration
 Draw First is inspired by having fun with friends with art!
