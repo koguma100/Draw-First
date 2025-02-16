@@ -22,11 +22,23 @@ function Game({isHost, category, lobbyID, username}) {
     const [guesses, setGuesses] = useState([]);
     const [guess, setGuess] = useState('');
     const [messageType, setMessageType] = useState('');
+    const [players, setPlayers] = useState({});
 
     // Establish WebSocket connection with the constructed URL
     const { sendJsonMessage, lastJsonMessage } = useWebSocket(WS_URL, {
         queryParams: { username: username, isHost: isHost, type: messageType } 
     });
+
+    // get messages from the server
+    useEffect(() => {
+        if (lastJsonMessage === null) return;
+
+        if (lastJsonMessage.type === 'updateUsers') {
+            setPlayers(lastJsonMessage.users);
+            console.log('Players updated');
+        }
+        console.log('Message received: ' + JSON.stringify(lastJsonMessage));
+    }, [lastJsonMessage]);
 
     useEffect(() => {
         
@@ -138,15 +150,14 @@ function Game({isHost, category, lobbyID, username}) {
                         <canvas ref={canvasRef}></canvas>
                         <div className="tools">
                             <div className="dropdown-container">
-                                <label htmlFor="scaleDropdown">Line Width: </label>
-                                <select onChange={handleChange} value={lineSize} id="scaleDropdown">
+                                <label htmlFor="scaleDropdown" className="title">Line Width: </label>
+                                <select onChange={handleChange} value={lineSize} id="scaleDropdown" className="title">
                                     <option value="2">2px</option>
                                     <option value="5">5px</option>
                                     <option value="10">10px</option>
                                     <option value="20">20px</option>
                                     <option value="50">50px</option>
                                 </select>
-                                <span id="output">{lineSize}</span>
                             </div>
                             <div className="colors">
                                 <div className="color" style={{backgroundColor: 'black'}} onClick={() => color.current='black'}></div>
@@ -185,6 +196,17 @@ function Game({isHost, category, lobbyID, username}) {
                 <button className="exit-lobby-button" onClick={exitLobby}>Exit Lobby</button>
             </div>
             
+            <div className="players-list">
+                <div className="player-display">_______Player________________Score_______</div>
+                {Object.keys(players).map(uuid => {
+                    const user = players[uuid];
+                    return (
+                        <div key={uuid} className='player-display'>
+                            <p>{user.username}</p><p>Score: {user.score}</p>
+                        </div>
+                    )})
+                }
+            </div>
         </div>
     )
 }

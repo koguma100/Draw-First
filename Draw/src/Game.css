@@ -73,3 +73,19 @@ canvas {
     margin: 0;
     padding: 0;
 }
+
+.players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 30%;
+    height: 20em;
+    background-color: rgb(255, 255, 255);
+  }
+
+.player-display {
+    height: 2em;
+    color: black;
+    display: flex;
+    justify-content: space-around;
+}
