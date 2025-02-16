@@ -11,6 +11,73 @@ function StartingMenu({setIsHost, setLobbyID}) {
         alertMessage: 'Enter Option to get started'
     });
 
+     // Function to handle form submission and send POST request to backend
+     const creategame = async () => {
+        // Send POST request to backend to save the code
+        try {
+            const response = await fetch('http://localhost:5000/create-game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Tell the server we are sending JSON
+                },
+                body: JSON.stringify({ code: menuData.lobbyCode, user: menuData.username }), // Send the code as JSON in the body
+            });
+
+            const result = await response.json();
+
+            // Check the response from the backend
+            if (response.ok) {
+                console.log('Code saved successfully:', result.message);
+                setIsHost(true); // Set the user as the host
+                nav('/category'); // Navigate to the category page
+            } else {
+                console.error('Error saving code:', result.error);
+                setMenuData((prevData) => ({
+                    ...prevData,
+                    alertMessage: 'Error creating game. Please try again.'
+                }));
+                return;
+            }
+        } catch (error) {
+            console.error('Error sending data:', error);
+        }
+    };
+
+ // Function to handle form submission and send POST request to backend
+    const joingame = async () => {
+        // Send POST request to backend to save the code
+        try {
+            const response = await fetch('http://localhost:5000/join-game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Tell the server we are sending JSON
+                },
+                body: JSON.stringify( {code:menuData.lobbyID,user:menuData.username} ), // Send the code as JSON in the body
+            });
+
+            const result = await response.json();
+
+            // Check the response from the backend
+            if (response.ok) {
+                console.log('Code saved successfully:', result.message);
+                setIsHost(true); // Set the user as the host
+                nav('/category'); // Navigate to the category page
+            } else {
+                console.error('Error saving code:', result.error);
+                setMenuData((prevData) => ({
+                    ...prevData,
+                    alertMessage: 'Room is full, cannot join game :('
+                }));
+                return;
+            }
+
+        } catch (error) {
+            console.error('Error sending data:', error);
+        }
+    };
+
+
+
     const handleChange = (event) => {
         const { name, value } = event.target;
         if (name === 'lobbyCode') {
@@ -45,8 +112,8 @@ function StartingMenu({setIsHost, setLobbyID}) {
         }
         else {
             // Create a new lobby
-            setIsHost(true);
-            nav('/category');
+            creategame();
+
         }
 
     };
@@ -72,6 +139,7 @@ function StartingMenu({setIsHost, setLobbyID}) {
         }
         else {
             // Join a lobby
+            joingame();
         }
     };
 
