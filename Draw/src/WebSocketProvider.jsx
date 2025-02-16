@@ -1,4 +1,4 @@
-import {useState, useEffect, useContext, createContext} from 'react';
+import {useState, useEffect, useRef, useContext, createContext} from 'react';
 
 const WebSocketContext = createContext();
 
@@ -7,15 +7,26 @@ export const useWebSocket = () => {
 };
 
 export const WebSocketProvider = ({ children }) => {
-  const [ws, setWs] = useState(null);
+  const wsRef = useRef(null);
   const [connected, setConnected] = useState(false);
+  const [message, setMessage] = useState('');
 
   const connectWebSocket = () => {
-    const socket = new WebSocket('ws://localhost:5000');
+
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      return;
+    }
+    const socket = new WebSocket('ws://localhost:5001');
 
     socket.onopen = () => {
       console.log('WebSocket connection established');
       setConnected(true);
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setMessage(data);
+      console.log('WebSocket message received:', data);
     };
 
     socket.onerror = (error) => {
@@ -27,12 +38,12 @@ export const WebSocketProvider = ({ children }) => {
       setConnected(false);
     };
 
-    setWs(socket);
+    wsRef.current = socket;
   };
 
   const disconnectWebSocket = () => {
-    if (ws) {
-      ws.close();
+    if (wsRef.current) {
+      wsRef.current.close();
       setConnected(false);
     }
   };
@@ -40,14 +51,14 @@ export const WebSocketProvider = ({ children }) => {
   // Cleanup when the component unmounts
   useEffect(() => {
     return () => {
-      if (ws) {
-        ws.close();
+      if (wsRef.current) {
+        wsRef.current.close();
       }
     };
-  }, [ws]);
+  }, []);
 
   return (
-    <WebSocketContext.Provider value={{ ws, connectWebSocket, disconnectWebSocket, connected }}>
+    <WebSocketContext.Provider value={{ wsRef: wsRef, connectWebSocket, disconnectWebSocket, connected, message }}>
       {children}
     </WebSocketContext.Provider>
   );

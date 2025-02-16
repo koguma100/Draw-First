@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import { useNavigate } from 'react-router-dom';
+import { useWebSocket } from './WebSocketProvider.jsx';
 
-function StartingMenu({setIsHost, setLobbyID}) {
+function StartingMenu({setIsHost, setLobbyID, setUsername}) {
     const nav = useNavigate();
+    const { wsRef, connectWebSocket, disconnectWebSocket, message } = useWebSocket();
     const [menuData, setMenuData] = useState({
         username: '',
         lobbyID: '',
@@ -77,11 +79,18 @@ function StartingMenu({setIsHost, setLobbyID}) {
     };
 
 
-
+    useEffect(() => {
+        if (wsRef.current != null) {
+            disconnectWebSocket();
+        }
+    }, []);
     const handleChange = (event) => {
         const { name, value } = event.target;
         if (name === 'lobbyCode') {
             setLobbyID(value);
+        }
+        if (name === 'username') {
+            setUsername(value);
         }
         setMenuData((prevData) => {
             return {

@@ -10,20 +10,21 @@ function App() {
   const [isHost, setIsHost] = useState(false);
   const [category, setCategory] = useState('');
   const [lobbyID, setLobbyID] = useState('');
+  const [username, setUsername] = useState('');
 
-  const CategoryRoute = ({ isHost, component: Component, setCategory }) => {
+  const CategoryRoute = ({ isHost, setIsHost, component: Component, setCategory }) => {
     if (!isHost) {
       // Redirect them to the startMenu if not valid host
       return <Navigate to="/" replace />;
     }
   
-    return <Component setCategory={setCategory}/>; 
+    return <Component setIsHost={setIsHost} setUsername={setUsername} setCategory={setCategory}/>; 
   };
 
-  const GameRoute = ({ isHost, category, lobbyID, component: Component }) => {
+  const GameRoute = ({ isHost, category, lobbyID, username, component: Component }) => {
     if (isHost && category != '') {
       // host creates a new lobby
-      return <Component category={category} lobbyID={lobbyID}/>;
+      return <Component isHost={isHost} category={category} lobbyID={lobbyID} username={username}/>;
     }
     else {
       // check Looby ID for avaiable lobby
@@ -38,12 +39,12 @@ function App() {
     <WebSocketProvider> 
       <Router>
         <Routes>
-          <Route path="/" element={<StartingMenu setIsHost={setIsHost} setLobbyID={setLobbyID} />} />
+          <Route path="/" element={<StartingMenu setIsHost={setIsHost} setLobbyID={setLobbyID} setUsername={setUsername} />} />
           <Route 
             path="/category" 
-            element={<CategoryRoute isHost={isHost} component={ChooseCategory} setCategory={setCategory}/>} 
+            element={<CategoryRoute isHost={isHost} setIsHost={setIsHost} component={ChooseCategory} setCategory={setCategory}/>} 
           />
-          <Route path="/game" element={<GameRoute isHost={isHost} category={category} lobbyID={lobbyID} component={Game} />} />
+          <Route path="/game" element={<GameRoute isHost={isHost} category={category} lobbyID={lobbyID} username={username} component={Game} />} />
         </Routes>
       </Router>
     </WebSocketProvider>   

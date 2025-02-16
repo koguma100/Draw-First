@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import './App.css'
 
-function ChooseCategory({setCategory}) {
+function ChooseCategory({setIsHost, setCategory}) {
 
     const navigate = useNavigate();
 
     const handleCategory = (event) => {
         const { name } = event.target;
         setCategory(name);
+        setIsHost(true);
         navigate('/game');
     };
 
