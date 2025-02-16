@@ -65,4 +65,11 @@ canvas {
     flex-direction: row;
     margin: 1.5em;
     justify-content: center;
+    gap: 1em;
+}
+
+.guesses {
+    color: black;
+    margin: 0;
+    padding: 0;
 }
