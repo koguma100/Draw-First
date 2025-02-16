@@ -82,6 +82,7 @@ function StartingMenu({setIsHost, setLobbyID, setUsername}) {
         }
         else {
             // Join a lobby
+            nav('/game');
         }
     };
 

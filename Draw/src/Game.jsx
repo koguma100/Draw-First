@@ -23,6 +23,7 @@ function Game({isHost, category, lobbyID, username}) {
     const [guess, setGuess] = useState('');
     const [messageType, setMessageType] = useState('');
     const [players, setPlayers] = useState({});
+    const [uniquePlayers, setUniquePlayers] = useState([]);
 
     // Establish WebSocket connection with the constructed URL
     const { sendJsonMessage, lastJsonMessage } = useWebSocket(WS_URL, {
@@ -32,13 +33,43 @@ function Game({isHost, category, lobbyID, username}) {
     // get messages from the server
     useEffect(() => {
         if (lastJsonMessage === null) return;
-
+        if (lastJsonMessage.type === 'startGame') {
+            console.log('Game started');
+            setGameStarted(true);
+        }
         if (lastJsonMessage.type === 'updateUsers') {
             setPlayers(lastJsonMessage.users);
             console.log('Players updated');
         }
-        console.log('Message received: ' + JSON.stringify(lastJsonMessage));
+        if (lastJsonMessage.type === 'guess') {
+            setGuesses([...guesses, [lastJsonMessage.user, lastJsonMessage.guess]]);
+            console.log('Guess received: ' + lastJsonMessage.user + ' guessed: ' + lastJsonMessage.guess);
+        }
     }, [lastJsonMessage]);
+
+    useEffect(() => {
+        // Convert the dictionary to an array
+        const playersArray = Object.entries(players).map(([uuid, { username, score }]) => ({
+          uuid,
+          username,
+          score
+        }));
+    
+        // Remove duplicates by username using a Map
+        const uniquePlayersMap = new Map();
+        playersArray.forEach(player => {
+          if (!uniquePlayersMap.has(player.username)) {
+            uniquePlayersMap.set(player.username, player);
+          }
+        });
+    
+        // Convert the Map back to an array and sort by username
+        const uniquePlayersArray = Array.from(uniquePlayersMap.values());
+        uniquePlayersArray.sort((a, b) => a.username.localeCompare(b.username));
+    
+        // Update the uniquePlayers state
+        setUniquePlayers(uniquePlayersArray);
+      }, [players]);
 
     useEffect(() => {
         
@@ -113,6 +144,7 @@ function Game({isHost, category, lobbyID, username}) {
 
         sendJsonMessage({type: 'guess', guess: guess, user: username});
         console.log(username + ' sent guess: ' + guess);    
+        setGuesses([...guesses, [username, guess]]);
         setGuess('');
     }
 
@@ -121,6 +153,24 @@ function Game({isHost, category, lobbyID, username}) {
         setLineSize(value); // Update state which will trigger re-render
         lineSizeRef.current = value; // Optionally update the ref
       };
+    
+    useEffect(() => {
+        if (isHost && !gameStarted)
+        {
+            setTopMessage('Category: ' + category + '   Lobby ID: ' + lobbyID + '   Host: ' + username);   
+            sendJsonMessage({type: 'startGame', word: 'elephant'}); // will need logic to change word
+        }
+        else if (!isHost && !gameStarted) {
+            setTopMessage('Waiting for host to start the game');
+        }
+        else {
+            setTopMessage('Make Some Guesses!');
+        }
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+
+    }, [gameStarted]);
 
     const startGame = () => {
         if (isHost)
@@ -192,14 +242,14 @@ function Game({isHost, category, lobbyID, username}) {
             </div>
             
             <div className="game-buttons">
-                {(!gameStarted && isHost) && <button className="start-game-button" onClick={startGame}>Start Game</button>}
+                {(!gameStarted && isHost) && <button className="start-game-button" onClick={() => setGameStarted(true)}>Start Game</button>}
                 <button className="exit-lobby-button" onClick={exitLobby}>Exit Lobby</button>
             </div>
             
             <div className="players-list">
                 <div className="player-display">_______Player________________Score_______</div>
-                {Object.keys(players).map(uuid => {
-                    const user = players[uuid];
+                {Object.keys(uniquePlayers).map(uuid => {
+                    const user = uniquePlayers[uuid];
                     return (
                         <div key={uuid} className='player-display'>
                             <p>{user.username}</p><p>Score: {user.score}</p>

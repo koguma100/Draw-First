@@ -31,19 +31,20 @@ const handleMessage = (bytes, uuid) => {
 
   if (message.type === 'updateUsers') {
     users = message.users;
+    broadcastUsers();
   }
   else if (message.type === 'guess') {
     // Broadcast the guess to all clients
     console.log(`User ${user.username} guessed: ${message.guess}`);
     Object.keys(connections).forEach((uuid) => {
       const connection = connections[uuid];
-      connection.send(JSON.stringify({
+      const message = JSON.stringify({
         type: 'guess',
         guess: message.guess,
         user: user.username,
-      }));
+      });
+      connection.send(message); 
     });
-    broadcastUsers();
   }
 };
 
@@ -77,7 +78,17 @@ wss.on('connection', (ws, request) => {
     ws.on('message', message => {
         const decodedMessage = JSON.parse(message.toString());
         const user = users[uuid];
-
+        if (message.type === 'startGame') {
+          // Broadcast the start game to all clients
+          console.log(`User ${user.username} started the game`);
+          Object.keys(connections).forEach((uuid) => {
+            const connection = connections[uuid];
+            connection.send(JSON.stringify({
+              type: 'startGame',
+              word: decodedMessage.word,
+            }));
+          });
+        }
         if (message.type === 'guess') {
           // Broadcast the guess to all clients
           console.log(`User ${user.username} guessed: ${decodedMessage.guess}`);

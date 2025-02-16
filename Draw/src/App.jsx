@@ -28,7 +28,7 @@ function App() {
     }
     else {
       // check Looby ID for avaiable lobby
-
+      return <Component isHost={isHost} category={category} lobbyID={lobbyID} username={username}/>
     }
 
     return <Navigate to="/" replace />; // else return to startMenu
