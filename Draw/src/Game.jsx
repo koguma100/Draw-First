@@ -1,15 +1,20 @@
 import { useState, useEffect, useRef, use } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWebSocket } from './WebSocketProvider.jsx';
 import './App.css';
 import './Game.css';
 
-function Game({category}) {
+function Game({category, lobbyID}) {
     // Establish WebSocket connection when component mounts
     const { ws, connectWebSocket, disconnectWebSocket, connected } = useWebSocket();
+    const navigate = useNavigate();
+
     const wsRef = useRef(null);
     const canvasRef = useRef(null);
-
     const isDrawingRef = useRef(false);
+    const [gameStarted, setGameStarted] = useState(false);
+    const [topMessage, setTopMessage] = useState('Lobby ID:' + lobbyID + '  Waiting for host to start the game');
+
     const color = useRef('black');
 
     useEffect(() => {
@@ -19,7 +24,7 @@ function Game({category}) {
             disconnectWebSocket();
         };
     }, []);
-    
+
     useEffect(() => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -97,10 +102,24 @@ function Game({category}) {
           canvas.removeEventListener('mousemove', draw);
         };
       }, [color.current]);
+    
+
+    const startGame = () => {
+        setTopMessage('Category: ' + category + '   Make Some Guesses!');
+        setGameStarted(true);
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    }
+
+    const exitLobby = () => {
+        navigate('/');
+        // Send a message to the server to exit lobby
+    }
 
     return (
         <div className="game-screen">
-            <h1 className="title">Make Some Guesses!</h1>
+                <h1>{topMessage}</h1>
                 <div className="canvas-log-wrapper">
                     <div className="drawing-features">
                         <canvas ref={canvasRef}></canvas>
@@ -118,12 +137,18 @@ function Game({category}) {
                         </div>
                     </div>
                 <div className="guess-log">
-                    <input type="text" placeholder="Enter your guess here"></input>
-                    <button>Submit</button>
+                    <div className="guess-input">
+                        <input type="text" placeholder="Enter your guess here"></input>
+                        <button className="guess-button">Submit</button>
+                    </div>
                     <div className="guesses"></div>
                 </div>
             </div>
             
+            <div className="game-buttons">
+                {!gameStarted && <button className="start-game-button" onClick={startGame}>Start Game</button>}
+                <button className="exit-lobby-button" onClick={exitLobby}>Exit Lobby</button>
+            </div>
             
         </div>
     )

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import { useNavigate } from 'react-router-dom';
 
-function StartingMenu({setIsHost}) {
+function StartingMenu({setIsHost, setLobbyID}) {
     const nav = useNavigate();
     const [menuData, setMenuData] = useState({
         username: '',
@@ -13,6 +13,9 @@ function StartingMenu({setIsHost}) {
 
     const handleChange = (event) => {
         const { name, value } = event.target;
+        if (name === 'lobbyCode') {
+            setLobbyID(value);
+        }
         setMenuData((prevData) => {
             return {
                 ...prevData,

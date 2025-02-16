@@ -23,7 +23,7 @@ function App() {
   const GameRoute = ({ isHost, category, lobbyID, component: Component }) => {
     if (isHost && category != '') {
       // host creates a new lobby
-      return <Component category={category}/>;
+      return <Component category={category} lobbyID={lobbyID}/>;
     }
     else {
       // check Looby ID for avaiable lobby
@@ -38,7 +38,7 @@ function App() {
     <WebSocketProvider> 
       <Router>
         <Routes>
-          <Route path="/" element={<StartingMenu setIsHost={setIsHost} />} />
+          <Route path="/" element={<StartingMenu setIsHost={setIsHost} setLobbyID={setLobbyID} />} />
           <Route 
             path="/category" 
             element={<CategoryRoute isHost={isHost} component={ChooseCategory} setCategory={setCategory}/>} 
