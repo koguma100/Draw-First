@@ -1,0 +1,50 @@
+.game-screen {
+    width: 60em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.canvas-log-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.guess-log {
+    background-color: white;
+    width: 25%;
+}
+
+.drawing-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    width: 100%;
+}
+
+canvas {
+    background-color: white;
+    border: 1px solid black;
+    width: 60%;
+    aspect-ratio: 1/0.6;
+}
+
+.colors {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    justify-content: center;
+    margin-top: 1em;
+    width: 60%; 
+}
+
+.color {
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    cursor: pointer;
+    user-select: none   ;
+}

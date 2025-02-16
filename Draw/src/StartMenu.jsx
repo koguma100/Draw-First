@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import './App.css'
+import { useNavigate } from 'react-router-dom';
 
-function StartingMenu() {
-
+function StartingMenu({setIsHost}) {
+    const nav = useNavigate();
     const [menuData, setMenuData] = useState({
         username: '',
         lobbyID: '',
@@ -41,6 +42,8 @@ function StartingMenu() {
         }
         else {
             // Create a new lobby
+            setIsHost(true);
+            nav('/category');
         }
 
     };
